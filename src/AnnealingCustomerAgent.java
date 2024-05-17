@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.List;
 import java.util.Scanner;
 
 public class AnnealingCustomerAgent extends Agent{
@@ -10,7 +11,7 @@ public class AnnealingCustomerAgent extends Agent{
     double t          = 50;		//aktuelle Temperatur T
     double deltaT     = 0;
     double mindAcRate = 0.8;    //Mindestakzeptanzrate
-    int    maxIter    = 1000000;  //Anzahl Iterationen
+    int    maxIter    = 20000;  //Anzahl Iterationen
     int    curIter    = 0;      //Aktuelle Iteration
     int    maxSim     = 1000;   //Anzahl an Iterationen, um Temperatur festzulegen
 
@@ -73,7 +74,7 @@ public class AnnealingCustomerAgent extends Agent{
             anzDelta++;
 
             if(curIter < maxSim) {//Temperatur ist noch nicht berechnet
-                if(Math.random() >= mindAcRate) {
+                if(Math.random() <= mindAcRate) {
                     return true;
                 }
                 else {
@@ -92,6 +93,18 @@ public class AnnealingCustomerAgent extends Agent{
                     return false;
                 }
             }
+        }
+    }
+
+    public boolean votePareto(int[] contract, int[] proposal) {
+        int timeContract = evaluate(contract);
+        int timeProposal = evaluate(proposal);
+
+        if (timeProposal < timeContract) {
+            return true;
+        }
+        else {
+            return false;
         }
     }
 
@@ -132,11 +145,21 @@ public class AnnealingCustomerAgent extends Agent{
     }
 
 
-    private int evaluate(int[] contract) {
+    public boolean isParetoEfficient(int[] candidate, List<int[]> allContracts) {
+        for (int[] contract : allContracts) {
+            if (this.vote(candidate, contract) && !this.vote(contract, candidate)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    public int evaluate(int[] contract) {
 
         int result = 0;
 
-        for (int i = 1; i < contract.length; i++) {// starte bei zweitem Job
+        for (int i = 1; i < contract.length; i++) { // starte bei zweitem Job
             // (also Index 1)
             int jobVor = contract[i - 1];
             int job = contract[i];

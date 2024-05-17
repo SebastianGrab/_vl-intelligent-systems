@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.List;
 import java.util.Scanner;
 
 public class AnnealingSupplierAgent extends Agent {
@@ -9,7 +10,7 @@ public class AnnealingSupplierAgent extends Agent {
     double t          = 50;		//aktuelle Temperatur T
     double deltaT     = 0;
     double mindAcRate = 0.8;    //Mindestakzeptanzrate
-    int    maxIter    = 1000000;  //Anzahl Iterationen
+    int    maxIter    = 20000;  //Anzahl Iterationen
     int    curIter    = 0;      //Aktuelle Iteration
     int    maxSim     = 1000;   //Anzahl an Iterationen, um Temperatur festzulegen
 
@@ -71,7 +72,7 @@ public class AnnealingSupplierAgent extends Agent {
             anzDelta++;
 
             if(curIter < maxSim) {//Temperatur ist noch nicht berechnet
-                if(Math.random() >= mindAcRate) {
+                if(Math.random() <= mindAcRate) {
                     return true;
                 }
                 else {
@@ -93,6 +94,18 @@ public class AnnealingSupplierAgent extends Agent {
         }
     }
 
+    public boolean votePareto(int[] contract, int[] proposal) {
+        int timeContract = evaluate(contract);
+        int timeProposal = evaluate(proposal);
+
+        if (timeProposal < timeContract) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     public int getContractSize() {
         return costMatrix.length;
     }
@@ -101,8 +114,16 @@ public class AnnealingSupplierAgent extends Agent {
         System.out.print(evaluate(contract));
     }
 
+    public boolean isParetoEfficient(int[] candidate, List<int[]> allContracts) {
+        for (int[] contract : allContracts) {
+            if (this.vote(candidate, contract) && !this.vote(contract, candidate)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-    private int evaluate(int[] contract) {
+    public int evaluate(int[] contract) {
 
         int result = 0;
         for (int i = 0; i < contract.length - 1; i++) {

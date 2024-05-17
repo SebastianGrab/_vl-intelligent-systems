@@ -1,5 +1,8 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Collections;
+import java.util.List;
+import java.util.ArrayList;
 
 public class Verhandlung {	
 
@@ -7,50 +10,81 @@ public class Verhandlung {
 			int[] contract, proposal;
 			Agent agA;
 			Agent agB;
-			Agent agC;
-			Agent agD;
-			Agent agE;
 			Mediator med;
 			int maxRounds, round;
-			boolean voteA, voteB, voteC, voteD, voteE;
+			boolean voteA, voteB;
+
+			List<int[]> allContracts = new ArrayList<>();
+			List<int[]> paretoEfficientContracts = new ArrayList<>();
 
 			
 			try{
-
 				agA = new AnnealingSupplierAgent(new File("data/daten3ASupplier_200.txt"));
 				agB = new AnnealingCustomerAgent(new File("data/daten4BCustomer_200_5.txt"));
-//				agA = new SupplierAgent(new File("data/daten3ASupplier_200.txt"));
-//				agB = new CustomerAgent(new File("data/daten4BCustomer_200_5.txt"));
-//				agC = new SupplierAgent(new File("data/daten5ASupplier_200.txt"));
-//				agD = new CustomerAgent(new File("data/daten3BCustomer_200_20.txt"));
-//				agE = new CustomerAgent(new File("data/daten4BCustomer_200_5.txt"));
 
 				med = new Mediator(agA.getContractSize(), agB.getContractSize());
 				
 				// Verhandlung initialisieren
 				contract  = med.initContract();							// Vertragslösung Jobliste
-				maxRounds = 1000000;										// Verhandlungsrunden
+				paretoEfficientContracts.add(contract);
+
+
+				maxRounds = 2;										// Verhandlungsrunden
 				//ausgabe(agA, agB, 0, contract);
-				
+
 				// Verhandlung starten
 
-				for(round=1;round<maxRounds;round++) {					// Mediator
-					proposal = med.constructProposal_SHIFT(contract);	// Zweck: Win-win
-					voteA    = agA.vote(contract, proposal);            // Autonomie + Private Infos
-					voteB    = agB.vote(contract, proposal);
-//					voteC    = agC.vote(contract, proposal);            // Autonomie + Private Infos
-//					voteD    = agD.vote(contract, proposal);
-//					voteE    = agE.vote(contract, proposal);            // Autonomie + Private Infos
-//
-//					voteB = true;
+				for(round=1;round<maxRounds;round++) {
 
-//					if(voteA && voteB && voteC && voteD && voteE) {
-					if(voteA && voteB) {
-						contract = proposal;
-						//ausgabe(agA, agB, agC, agD, agE, round, contract);
-						ausgabe(agA, agB, round, contract);
+					int nr = (int)(paretoEfficientContracts.size()*Math.random());
+					System.out.println(round + " " + nr + " " + paretoEfficientContracts.size());
+					int[] select = paretoEfficientContracts.get(nr);
+
+					List<int[]> paretoEfficientContractsTMP = new ArrayList<>();
+
+					// Mediator
+					proposal = med.constructProposal_SHIFT(select);	// Zweck: Win-win
+					boolean flag = false;
+					for(int i=0;i<paretoEfficientContracts.size();i++){
+						select = paretoEfficientContracts.get(i);
+
+						voteA    = agA.votePareto(select, proposal);            // Autonomie + Private Infos
+						voteB    = agB.votePareto(select, proposal);
+
+						if(voteA && voteB) {
+							flag = true;
+						}
+
+						if(voteA != voteB){
+							paretoEfficientContractsTMP.add(select);
+							flag = true;
+						}
+
+						if(!voteA && !voteB){
+							paretoEfficientContractsTMP.add(select);
+						}
+
 					}
-				}			
+					if(flag){
+						paretoEfficientContractsTMP.add(proposal);
+					}
+					paretoEfficientContracts = paretoEfficientContractsTMP;
+				}
+
+
+				// Print Pareto efficient contracts
+				printContracts(paretoEfficientContracts);
+				System.out.print("------------------------------");
+
+				for (int[] effcon : paretoEfficientContracts)
+				{
+					System.out.println();
+					System.out.print(agA.evaluate(effcon));
+					System.out.print(",");
+					System.out.print(agB.evaluate(effcon));
+					System.out.print(",");
+				}
+				System.out.print("------------------------------");
 				
 			}
 			catch(FileNotFoundException e){
@@ -65,19 +99,11 @@ public class Verhandlung {
 			a2.printUtility(contract);
 			System.out.println();
 		}
-		
-		public static void ausgabe(Agent a1, Agent a2, Agent a3, Agent a4, Agent a5, int i, int[] contract){
-			System.out.print(i + " -> " );
-			a1.printUtility(contract);
-			System.out.print("  ");
-			a2.printUtility(contract);
-			System.out.print("  ");
-			a3.printUtility(contract);
-			System.out.print("  ");
-			a4.printUtility(contract);
-			System.out.print("  ");
-			a5.printUtility(contract);
-			System.out.println();
-		}
 
+
+		public static void printContracts(List<int[]> contracts) {
+			for (int[] c : contracts) {
+				System.out.println("Contract Terms: " + java.util.Arrays.toString(c));
+			}
+		}
 }

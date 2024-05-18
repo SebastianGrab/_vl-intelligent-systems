@@ -32,24 +32,19 @@ public class Mediator {
     public int[] constructProposal_SHIFT(int[] contract) {
         int[] proposal = new int[contract.length];
 
-        // Kopiere die Werte aus dem Vertrags-Array in das Vorschlags-Array
         for (int i = 0; i < proposal.length; i++) {
             proposal[i] = contract[i];
         }
 
-        // Wähle zufällig eine Zahl und eine Position für das Einfügen im Proposal-Array
         int indexToShift = (int) (Math.random() * proposal.length);
         int newIndex = (int) (Math.random() * indexToShift);
 
-        // Speichere die ausgewählte Zahl
         int numberToInsert = proposal[indexToShift];
 
-        // Verschiebe die Zahlen ab der neuen Position um eine Stelle nach hinten
             for (int i = indexToShift; i > newIndex; i--) {
                 proposal[i] = proposal[i - 1];
             }
 
-        // Füge die ausgewählte Zahl an der neuen Position ein
         proposal[newIndex] = numberToInsert;
 
         return proposal;

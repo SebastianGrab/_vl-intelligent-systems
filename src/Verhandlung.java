@@ -25,12 +25,11 @@ public class Verhandlung {
 				med = new Mediator(agA.getContractSize(), agB.getContractSize());
 				
 				// Verhandlung initialisieren
-				contract  = med.initContract();							// Vertragslösung Jobliste
+				contract  = med.initContract();
 				paretoEfficientContracts.add(contract);
 
 
-				maxRounds = 2;										// Verhandlungsrunden
-				//ausgabe(agA, agB, 0, contract);
+				maxRounds = 1000000;
 
 				// Verhandlung starten
 
@@ -48,7 +47,7 @@ public class Verhandlung {
 					for(int i=0;i<paretoEfficientContracts.size();i++){
 						select = paretoEfficientContracts.get(i);
 
-						voteA    = agA.votePareto(select, proposal);            // Autonomie + Private Infos
+						voteA    = agA.votePareto(select, proposal);
 						voteB    = agB.votePareto(select, proposal);
 
 						if(voteA && voteB) {
@@ -62,28 +61,32 @@ public class Verhandlung {
 
 						if(!voteA && !voteB){
 							paretoEfficientContractsTMP.add(select);
+							for(int l=i;l<paretoEfficientContracts.size();l++){
+								paretoEfficientContractsTMP.add(paretoEfficientContracts.get(l));
+							}
+							flag = false;
+							break;
 						}
 
 					}
 					if(flag){
 						paretoEfficientContractsTMP.add(proposal);
 					}
-					paretoEfficientContracts = paretoEfficientContractsTMP;
+					paretoEfficientContracts = paretoEfficientContractsTMP.stream().distinct().toList();
 				}
 
-
 				// Print Pareto efficient contracts
-				printContracts(paretoEfficientContracts);
-				System.out.print("------------------------------");
+				// printContracts(paretoEfficientContracts);
+				// System.out.print("------------------------------");
 
 				for (int[] effcon : paretoEfficientContracts)
 				{
 					System.out.println();
 					System.out.print(agA.evaluate(effcon));
-					System.out.print(",");
+					System.out.print(" ");
 					System.out.print(agB.evaluate(effcon));
-					System.out.print(",");
 				}
+				System.out.println();
 				System.out.print("------------------------------");
 				
 			}
@@ -91,15 +94,6 @@ public class Verhandlung {
 				System.out.println(e.getMessage());
 			}
 		}
-		
-		public static void ausgabe(Agent a1, Agent a2, int i, int[] contract){
-			System.out.print(i + " -> " );
-			a1.printUtility(contract);
-			System.out.print("  ");
-			a2.printUtility(contract);
-			System.out.println();
-		}
-
 
 		public static void printContracts(List<int[]> contracts) {
 			for (int[] c : contracts) {

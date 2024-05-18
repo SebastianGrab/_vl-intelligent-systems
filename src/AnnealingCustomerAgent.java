@@ -8,12 +8,12 @@ public class AnnealingCustomerAgent extends Agent{
     private int[][] timeMatrix;
     private int[][] delayMatrix;
 
-    double t          = 50;		//aktuelle Temperatur T
+    double t          = 50;		    // Aktuelle Temperatur T
     double deltaT     = 0;
-    double mindAcRate = 0.8;    //Mindestakzeptanzrate
-    int    maxIter    = 20000;  //Anzahl Iterationen
-    int    curIter    = 0;      //Aktuelle Iteration
-    int    maxSim     = 1000;   //Anzahl an Iterationen, um Temperatur festzulegen
+    double mindAcRate = 0.8;        // Mindestakzeptanzrate
+    int    maxIter    = 1000000;    // Anzahl Iterationen
+    int    curIter    = 0;          // Aktuelle Iteration
+    int    maxSim     = 1000;       // Anzahl an Iterationen, um Temperatur festzulegen
 
     double sumDelta   = 0;
     int    anzDelta   = 0;
@@ -39,7 +39,6 @@ public class AnnealingCustomerAgent extends Agent{
     }
 
 
-
     public boolean vote(int[] contract, int[] proposal) {
         int timeContract = evaluate(contract);
         int timeProposal = evaluate(proposal);
@@ -56,11 +55,10 @@ public class AnnealingCustomerAgent extends Agent{
             deltaT = t/(maxIter - maxSim);
 
 
-            System.out.println("AVG: ---------   " + avgDelta + " "+ vbRate + " "+ akzeptanzrate + " " + t + " "+ deltaT);
+            // System.out.println("AVG: ---------   " + avgDelta + " "+ vbRate + " "+ akzeptanzrate + " " + t + " "+ deltaT);
         }
         else if(curIter > maxSim) {
             t-=deltaT;
-            // System.out.println("------------------------------->" + t);
         }
 
         if (timeProposal < timeContract) {
@@ -100,7 +98,7 @@ public class AnnealingCustomerAgent extends Agent{
         int timeContract = evaluate(contract);
         int timeProposal = evaluate(proposal);
 
-        if (timeProposal < timeContract) {
+        if (timeProposal <= timeContract) {
             return true;
         }
         else {
@@ -143,17 +141,6 @@ public class AnnealingCustomerAgent extends Agent{
             }
         }
     }
-
-
-    public boolean isParetoEfficient(int[] candidate, List<int[]> allContracts) {
-        for (int[] contract : allContracts) {
-            if (this.vote(candidate, contract) && !this.vote(contract, candidate)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
 
     public int evaluate(int[] contract) {
 

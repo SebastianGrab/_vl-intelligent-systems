@@ -124,4 +124,12 @@ public class AnnealingSupplierAgent extends Agent {
         return result;
     }
 
+    public int averageCost(List<int[]> contracts) {
+        int totalCost = 0;
+        for (int i = 0; i < contracts.size(); i++) {
+            totalCost += evaluate(contracts.get(i));
+        }
+        return totalCost / contracts.size();
+    }
+
 }

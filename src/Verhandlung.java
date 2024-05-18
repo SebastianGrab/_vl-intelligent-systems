@@ -82,12 +82,36 @@ public class Verhandlung {
 				for (int[] effcon : paretoEfficientContracts)
 				{
 					System.out.println();
+
+					// Time of A
 					System.out.print(agA.evaluate(effcon));
 					System.out.print(" ");
+					// Time minus avg Time of A
+					System.out.print(agA.evaluate(effcon) - agA.averageCost(paretoEfficientContracts));
+					System.out.print(" ");
+
+					// Time of B
 					System.out.print(agB.evaluate(effcon));
+					System.out.print(" ");
+					// Time minus avg Time of B
+					System.out.print(agB.evaluate(effcon) - agB.averageCost(paretoEfficientContracts));
+					System.out.print(" ");
+
+					// Avg time of A & B
+					System.out.print(((agA.evaluate(effcon) - agA.averageCost(paretoEfficientContracts)) + (agB.evaluate(effcon) - agB.averageCost(paretoEfficientContracts)))/2);
+					System.out.print(" ");
+					// Payment A
+					System.out.print(((agA.evaluate(effcon) - agA.averageCost(paretoEfficientContracts)) + (agB.evaluate(effcon) - agB.averageCost(paretoEfficientContracts)))/2 - (agA.evaluate(effcon) - agA.averageCost(paretoEfficientContracts)));
+					System.out.print(" ");
+					// Payment B
+					System.out.print(((agA.evaluate(effcon) - agA.averageCost(paretoEfficientContracts)) + (agB.evaluate(effcon) - agB.averageCost(paretoEfficientContracts)))/2 - (agB.evaluate(effcon) - agB.averageCost(paretoEfficientContracts)));
 				}
 				System.out.println();
 				System.out.print("------------------------------");
+				System.out.println();
+				System.out.print(agA.averageCost(paretoEfficientContracts));
+				System.out.println();
+				System.out.print(agB.averageCost(paretoEfficientContracts));
 				
 			}
 			catch(FileNotFoundException e){

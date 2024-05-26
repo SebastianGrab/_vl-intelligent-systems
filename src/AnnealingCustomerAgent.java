@@ -11,7 +11,7 @@ public class AnnealingCustomerAgent extends Agent{
     double t          = 50;		    // Aktuelle Temperatur T
     double deltaT     = 0;
     double mindAcRate = 0.8;        // Mindestakzeptanzrate
-    int    maxIter    = 1000000;    // Anzahl Iterationen
+    int    maxIter    = 3000000;    // Anzahl Iterationen
     int    curIter    = 0;          // Aktuelle Iteration
     int    maxSim     = 1000;       // Anzahl an Iterationen, um Temperatur festzulegen
 

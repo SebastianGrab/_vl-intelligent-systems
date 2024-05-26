@@ -3,6 +3,9 @@ import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class Verhandlung {	
 
@@ -28,15 +31,14 @@ public class Verhandlung {
 				contract  = med.initContract();
 				paretoEfficientContracts.add(contract);
 
-
-				maxRounds = 1000000;
+				maxRounds = 3000000;
 
 				// Verhandlung starten
 
 				for(round=1;round<maxRounds;round++) {
 
 					int nr = (int)(paretoEfficientContracts.size()*Math.random());
-					System.out.println(round + " " + nr + " " + paretoEfficientContracts.size());
+					// System.out.println(round + " " + nr + " " + paretoEfficientContracts.size());
 					int[] select = paretoEfficientContracts.get(nr);
 
 					List<int[]> paretoEfficientContractsTMP = new ArrayList<>();
@@ -79,33 +81,69 @@ public class Verhandlung {
 				// printContracts(paretoEfficientContracts);
 				// System.out.print("------------------------------");
 
-				for (int[] effcon : paretoEfficientContracts)
-				{
-					System.out.println();
+				// List to store the results
+				List<Double[]> results = new ArrayList<>();
 
-					// Time of A
-					System.out.print(agA.evaluate(effcon));
-					System.out.print(" ");
-					// Time minus avg Time of A
-					System.out.print(agA.evaluate(effcon) - agA.averageCost(paretoEfficientContracts));
-					System.out.print(" ");
+				try (BufferedWriter writer = new BufferedWriter(new FileWriter("result.csv"))) {
+					// Write the header
+					writer.write("Time of A;Time minus avg Time of A;Time of B;Time minus avg Time of B;Avg time of A & B;Payment A;Payment B");
+					writer.newLine();
 
-					// Time of B
-					System.out.print(agB.evaluate(effcon));
-					System.out.print(" ");
-					// Time minus avg Time of B
-					System.out.print(agB.evaluate(effcon) - agB.averageCost(paretoEfficientContracts));
-					System.out.print(" ");
+					for (int[] effcon : paretoEfficientContracts) {
+						// Calculate the values
+						double timeA = agA.evaluate(effcon);
+						double timeMinusAvgA = timeA - agA.averageCost(paretoEfficientContracts);
+						double timeB = agB.evaluate(effcon);
+						double timeMinusAvgB = timeB - agB.averageCost(paretoEfficientContracts);
+						double avgTime = (timeMinusAvgA + timeMinusAvgB) / 2;
+						double paymentA = avgTime - timeMinusAvgA;
+						double paymentB = avgTime - timeMinusAvgB;
 
-					// Avg time of A & B
-					System.out.print(((agA.evaluate(effcon) - agA.averageCost(paretoEfficientContracts)) + (agB.evaluate(effcon) - agB.averageCost(paretoEfficientContracts)))/2);
-					System.out.print(" ");
-					// Payment A
-					System.out.print(((agA.evaluate(effcon) - agA.averageCost(paretoEfficientContracts)) + (agB.evaluate(effcon) - agB.averageCost(paretoEfficientContracts)))/2 - (agA.evaluate(effcon) - agA.averageCost(paretoEfficientContracts)));
-					System.out.print(" ");
-					// Payment B
-					System.out.print(((agA.evaluate(effcon) - agA.averageCost(paretoEfficientContracts)) + (agB.evaluate(effcon) - agB.averageCost(paretoEfficientContracts)))/2 - (agB.evaluate(effcon) - agB.averageCost(paretoEfficientContracts)));
+						// Write the values to the CSV file
+						writer.write(timeA + ";" + timeMinusAvgA + ";" + timeB + ";" + timeMinusAvgB + ";" + avgTime + ";" + paymentA + ";" + paymentB);
+						writer.newLine();
+
+						// Add the results to the list
+						results.add(new Double[]{
+								timeA,
+								timeMinusAvgA,
+								timeB,
+								timeMinusAvgB,
+								avgTime,
+								paymentA,
+								paymentB
+						});
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
+
+				// Find the minimum avgTime
+				double minAvgTime = Double.MAX_VALUE;
+				for (Double[] result : results) {
+					double avgTime = result[4];
+					if (avgTime < minAvgTime) {
+						minAvgTime = avgTime;
+					}
+				}
+
+				// Collect all lines with the minimum avgTime
+				List<Double[]> minAvgTimeResults = new ArrayList<>();
+				for (Double[] result : results) {
+					double avgTime = result[4];
+					if (avgTime == minAvgTime) {
+						minAvgTimeResults.add(result);
+					}
+				}
+
+				// Print the lines with the minimum avgTime
+				System.out.println("Minimum avgTime:");
+				System.out.println();
+				System.out.println("Time of A; Time minus avg Time of A; Time of B; Time minus avg Time of B; Avg time of A & B; Payment A; Payment B");
+				for (Double[] result : minAvgTimeResults) {
+					System.out.println(join(result, "; "));
+				}
+
 				System.out.println();
 				System.out.print("------------------------------");
 				System.out.println();
@@ -123,5 +161,17 @@ public class Verhandlung {
 			for (int[] c : contracts) {
 				System.out.println("Contract Terms: " + java.util.Arrays.toString(c));
 			}
+		}
+
+		// Utility method to join an array of Doubles into a String
+		public static String join(Double[] array, String delimiter) {
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < array.length; i++) {
+				sb.append(array[i]);
+				if (i < array.length - 1) {
+					sb.append(delimiter);
+				}
+			}
+			return sb.toString();
 		}
 }

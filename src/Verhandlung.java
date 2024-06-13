@@ -31,7 +31,7 @@ public class Verhandlung {
 				contract  = med.initContract();
 				paretoEfficientContracts.add(contract);
 
-				maxRounds = 3000000;
+				maxRounds = 10000000;
 
 				// Verhandlung starten
 
@@ -86,7 +86,7 @@ public class Verhandlung {
 
 				try (BufferedWriter writer = new BufferedWriter(new FileWriter("result.csv"))) {
 					// Write the header
-					writer.write("Time of A;Time minus avg Time of A;Time of B;Time minus avg Time of B;Avg time of A & B;Payment A;Payment B");
+					writer.write("Time of A;Time minus avg Time of A;Time of B;Time minus avg Time of B;Avg time of A & B;Payment A;Payment B;Fact. Time of A;Fact. Time minus avg Time of A;Fact. Time of B;Fact. Time minus avg Time of B;Fact. Avg time of A & B;Fact. Payment A;Fact. Payment B");
 					writer.newLine();
 
 					for (int[] effcon : paretoEfficientContracts) {
@@ -98,9 +98,16 @@ public class Verhandlung {
 						double avgTime = (timeMinusAvgA + timeMinusAvgB) / 2;
 						double paymentA = avgTime - timeMinusAvgA;
 						double paymentB = avgTime - timeMinusAvgB;
+						double fac_timeA = agA.evaluate(effcon) * 1000;
+						double fac_timeMinusAvgA = fac_timeA - agA.averageCost(paretoEfficientContracts);
+						double fac_timeB = agB.evaluate(effcon);
+						double fac_timeMinusAvgB = fac_timeB - agB.averageCost(paretoEfficientContracts);
+						double fac_avgTime = (fac_timeMinusAvgA + fac_timeMinusAvgB) / 2;
+						double fac_paymentA = fac_avgTime - fac_timeMinusAvgA;
+						double fac_paymentB = fac_avgTime - fac_timeMinusAvgB;
 
 						// Write the values to the CSV file
-						writer.write(timeA + ";" + timeMinusAvgA + ";" + timeB + ";" + timeMinusAvgB + ";" + avgTime + ";" + paymentA + ";" + paymentB);
+						writer.write(timeA + ";" + timeMinusAvgA + ";" + timeB + ";" + timeMinusAvgB + ";" + avgTime + ";" + paymentA + ";" + paymentB + ";" + fac_timeA + ";" + fac_timeMinusAvgA + ";" + fac_timeB + ";" + fac_timeMinusAvgB + ";" + fac_avgTime + ";" + fac_paymentA + ";" + fac_paymentB);
 						writer.newLine();
 
 						// Add the results to the list
@@ -117,6 +124,9 @@ public class Verhandlung {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+
+
+
 
 				// Find the minimum avgTime
 				double minAvgTime = Double.MAX_VALUE;

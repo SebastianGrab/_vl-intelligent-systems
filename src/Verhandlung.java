@@ -31,12 +31,14 @@ public class Verhandlung {
 				contract  = med.initContract();
 				paretoEfficientContracts.add(contract);
 
-				maxRounds = 10000000;
+				maxRounds = 1000000;
 
 				// Verhandlung starten
 
 				for(round=1;round<maxRounds;round++) {
-
+					// if (round % 1000000 == 0) {
+					// 	System.out.println("Reached " + round);
+					// }
 					int nr = (int)(paretoEfficientContracts.size()*Math.random());
 					// System.out.println(round + " " + nr + " " + paretoEfficientContracts.size());
 					int[] select = paretoEfficientContracts.get(nr);
@@ -86,7 +88,7 @@ public class Verhandlung {
 
 				try (BufferedWriter writer = new BufferedWriter(new FileWriter("result.csv"))) {
 					// Write the header
-					writer.write("Time of A;Time minus avg Time of A;Time of B;Time minus avg Time of B;Avg time of A & B;Payment A;Payment B;Fact. Time of A;Fact. Time minus avg Time of A;Fact. Time of B;Fact. Time minus avg Time of B;Fact. Avg time of A & B;Fact. Payment A;Fact. Payment B");
+					writer.write("Time of A;Time minus avg Time of A;Time of B;Time minus avg Time of B;Avg time of A & B;Payment A;Payment B;Fact.A Time of A;Fact.A Time minus avg Time of A;Fact.A Time of B;Fact.A Time minus avg Time of B;Fact.A Avg time of A & B;Fact.A Payment A;Fact.A Payment B;Fact.B Time of A;Fact.B Time minus avg Time of A;Fact.B Time of B;Fact.B Time minus avg Time of B;Fact.B Avg time of A & B;Fact.B Payment A;Fact.B Payment B");
 					writer.newLine();
 
 					for (int[] effcon : paretoEfficientContracts) {
@@ -98,16 +100,23 @@ public class Verhandlung {
 						double avgTime = (timeMinusAvgA + timeMinusAvgB) / 2;
 						double paymentA = avgTime - timeMinusAvgA;
 						double paymentB = avgTime - timeMinusAvgB;
-						double fac_timeA = agA.evaluate(effcon) * 1000;
-						double fac_timeMinusAvgA = fac_timeA - agA.averageCost(paretoEfficientContracts);
-						double fac_timeB = agB.evaluate(effcon);
-						double fac_timeMinusAvgB = fac_timeB - agB.averageCost(paretoEfficientContracts);
-						double fac_avgTime = (fac_timeMinusAvgA + fac_timeMinusAvgB) / 2;
-						double fac_paymentA = fac_avgTime - fac_timeMinusAvgA;
-						double fac_paymentB = fac_avgTime - fac_timeMinusAvgB;
+						double facA_timeA = agA.evaluate(effcon) * 1000;
+						double facA_timeMinusAvgA = facA_timeA - agA.averageCost(paretoEfficientContracts);
+						double facA_timeB = agB.evaluate(effcon);
+						double facA_timeMinusAvgB = facA_timeB - agB.averageCost(paretoEfficientContracts);
+						double facA_avgTime = (facA_timeMinusAvgA + facA_timeMinusAvgB) / 2;
+						double facA_paymentA = facA_avgTime - facA_timeMinusAvgA;
+						double facA_paymentB = facA_avgTime - facA_timeMinusAvgB;
+						double facB_timeA = agA.evaluate(effcon);
+						double facB_timeMinusAvgA = facB_timeA - agA.averageCost(paretoEfficientContracts);
+						double facB_timeB = agB.evaluate(effcon) * 1000;
+						double facB_timeMinusAvgB = facB_timeB - agB.averageCost(paretoEfficientContracts);
+						double facB_avgTime = (facB_timeMinusAvgA + facB_timeMinusAvgB) / 2;
+						double facB_paymentA = facB_avgTime - facB_timeMinusAvgA;
+						double facB_paymentB = facB_avgTime - facB_timeMinusAvgB;
 
 						// Write the values to the CSV file
-						writer.write(timeA + ";" + timeMinusAvgA + ";" + timeB + ";" + timeMinusAvgB + ";" + avgTime + ";" + paymentA + ";" + paymentB + ";" + fac_timeA + ";" + fac_timeMinusAvgA + ";" + fac_timeB + ";" + fac_timeMinusAvgB + ";" + fac_avgTime + ";" + fac_paymentA + ";" + fac_paymentB);
+						writer.write(timeA + ";" + timeMinusAvgA + ";" + timeB + ";" + timeMinusAvgB + ";" + avgTime + ";" + paymentA + ";" + paymentB + ";" + facA_timeA + ";" + facA_timeMinusAvgA + ";" + facA_timeB + ";" + facA_timeMinusAvgB + ";" + facA_avgTime + ";" + facA_paymentA + ";" + facA_paymentB + ";" + facB_timeA + ";" + facB_timeMinusAvgA + ";" + facB_timeB + ";" + facB_timeMinusAvgB + ";" + facB_avgTime + ";" + facB_paymentA + ";" + facB_paymentB);
 						writer.newLine();
 
 						// Add the results to the list
